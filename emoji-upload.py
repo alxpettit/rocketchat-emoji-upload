@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-
+import requests
 from pymongo import MongoClient
 import gridfs
 import time
@@ -8,13 +8,13 @@ import datetime
 from bson.json_util import loads
 import json
 import yaml
-import urllib2
+import urllib
 
-emoji_yaml_url = raw_input("URL for YAML file?")
-mongo_server = raw_input("MongoDB URI for your rocketchat deployment?")
+emoji_yaml_url = input("URL for YAML file?")
+mongo_server = input("MongoDB URI for your rocketchat deployment?")
 
-response = urllib2.urlopen(emoji_yaml_url)
-emoji_yaml = yaml.load(response.read())
+response = requests.get(emoji_yaml_url)
+emoji_yaml = yaml.load(response.text)
 
 # load YAML into parsable list
 emojis = emoji_yaml['emojis']
@@ -34,18 +34,14 @@ db = client.rocketchat
 # gridfs file uploader function
 def gfs_fileuploader(name, content, url):
     custom_emoji = gridfs.GridFS(db, 'custom_emoji')
-    opener = urllib2.build_opener()
+    opener = urllib.open
     # change user agent to wget, for some reason CDN does not like urillib2
     opener.addheaders = [('User-Agent', 'Wget/1.19.1 (darwin16.6.0)')]
     emoji_resp = opener.open(url)
     emoji_file = emoji_resp.read()
-    with custom_emoji.new_file(
-        _id=name,
-        filename=name  ,
-        content_type=content,
-        alias=None) as fp:
+    with custom_emoji.new_file(_id=name, filename=name, content_type=content, alias=None) as fp:
         fp.write(emoji_file)
-    return;
+    return
 
 
 # download image files and make Array for DB entries
@@ -60,21 +56,17 @@ for emoji in emojis:
         name = emoji['name']
         ext = file[1]
         new_file = name + '.' + ext
-        print new_file
-        print emoji['src']
+        print(new_file)
+        print(emoji['src'])
         gfs_fileuploader(new_file, 'image/' + ext, emoji['src'])
         item = {
-                "name": name,
-                "aliases": [],
-                "extension": ext,
-                "_updatedAt": {
-                    "$date": ts }
+                "name": name, "aliases": [], "extension": ext, "_updatedAt": {"$date": ts}
                 }
         item = json.dumps(item)
         item = loads(item)
         new_emojis.append(item)
     except:
-        print "error getting image"
+        print("error getting image")
         pass
 
 

@@ -1,2 +1,3 @@
-pymongo
-PyYAML
+pymongo~=3.12.0
+PyYAML~=5.4.1
+requests~=2.26.0
