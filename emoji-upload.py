@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Copyleft (C) Alexandria Pettit 2021, MIT-licnesed
+# Originally by Alex Typaldos (2017), but their code was boomer and old and didn't work anymore, so I'm fixing it up!
+# You may consider my additions to also be MIT-licensed out of respect for the original creator :)
+
 import requests
 from pymongo import MongoClient
 import gridfs
